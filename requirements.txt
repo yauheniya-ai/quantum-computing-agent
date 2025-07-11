@@ -1,0 +1,7 @@
+langgraph 
+langchain-openai 
+qiskit 
+qiskit-aer
+qiskit[visualization]
+matplotlib 
+python-dotenv
