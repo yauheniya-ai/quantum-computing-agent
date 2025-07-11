@@ -1,8 +1,7 @@
 # Python 3.12.9
-langgraph 
-langchain-openai 
-qiskit 
-qiskit-aer
-qiskit[visualization]
-matplotlib 
-python-dotenv
+langgraph==0.5.2
+langchain-openai==0.3.27
+qiskit[visualization]==2.1.1
+qiskit-aer==0.17.1
+matplotlib==3.10.3
+python-dotenv==1.1.1

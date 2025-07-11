@@ -2,12 +2,12 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph, MessagesState
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import ToolNode
 from typing import List
 
-# Set matplotlib backend before importing pyplot!
+# Set matplotlib backend before importing pyplot
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -22,70 +22,152 @@ from qiskit.visualization import plot_histogram, plot_bloch_multivector
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+# Predefined test circuits
+PREDEFINED_CIRCUITS = {
+    "hadamard": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(1, 1)
+qc.h(0)
+qc.measure(0, 0)
+""",
+    "x_gate": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(1, 1)
+qc.x(0)
+qc.measure(0, 0)
+""",
+    "bell": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(2, 2)
+qc.h(0)
+qc.cx(0, 1)
+qc.measure([0, 1], [0, 1])
+""",
+    "hh": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(1, 1)
+qc.h(0)
+qc.h(0)
+qc.measure(0, 0)
+""",
+    "ry": """
+from qiskit import QuantumCircuit
+from numpy import pi
+qc = QuantumCircuit(1, 1)
+qc.ry(pi/4, 0)
+qc.measure(0, 0)
+"""
+}
+
 # 1. Define the quantum tool
 @tool
 def quantum_tool(task: str) -> str:
     """
-    Runs a quantum circuit based on the task description.
-    If the task includes 'hadamard', applies a Hadamard gate.
-    Returns a summary and saves circuit, histogram, and Bloch sphere as images.
+    Runs a quantum circuit. Accepts either:
+    - A keyword like 'hadamard', 'bell', etc.
+    - Raw Qiskit code (must define 'qc = QuantumCircuit(...)')
     """
-    qc = QuantumCircuit(1, 1)
-    if "hadamard" in task.lower():
-        qc.h(0)
-    qc.measure(0, 0)
 
-    # Draw circuit and save as image
+    task_clean = task.strip().lower()
+
+    # Match known keywords from natural language
+    for name, code in PREDEFINED_CIRCUITS.items():
+        if name in task_clean:
+            task = name
+            break
+
+    # Either use predefined or treat input as Qiskit code
+    code = PREDEFINED_CIRCUITS.get(task, task)
+
+    local_vars = {}
+    try:
+        exec(code, {}, local_vars)
+        qc = local_vars.get("qc")
+        if qc is None or not isinstance(qc, QuantumCircuit):
+            return "Error: No valid QuantumCircuit named 'qc' found."
+    except Exception as e:
+        return f"Error in Qiskit code: {str(e)}"
+
+    # Draw and save circuit diagram
     fig = qc.draw(output='mpl')
     fig.savefig('circuit.png')
 
-    # Run the circuit using the new Qiskit 1.0+ API
+    # Run simulation
     simulator = Aer.get_backend('aer_simulator')
-    compiled_circuit = transpile(qc, simulator)
-    job = simulator.run(compiled_circuit, shots=1024)
-    result = job.result()
-    counts = result.get_counts(compiled_circuit)
+    compiled = transpile(qc, simulator)
+    job = simulator.run(compiled, shots=1024)
+    counts = job.result().get_counts()
 
-    # Plot histogram and save as image
     fig_hist = plot_histogram(counts)
     fig_hist.savefig('histogram.png')
 
-    # Bloch sphere (before measurement)
-    qc2 = QuantumCircuit(1)
-    if "hadamard" in task.lower():
-        qc2.h(0)
-    qc2.save_statevector()
-    compiled_circuit2 = transpile(qc2, simulator)
-    result2 = simulator.run(compiled_circuit2).result()
-    final_state = result2.get_statevector(compiled_circuit2)
-    fig_bloch = plot_bloch_multivector(final_state)
-    fig_bloch.savefig('bloch.png')
+    # Attempt Bloch sphere (only if 1 qubit and no measurement)
+    try:
+        if qc.num_qubits == 1 and qc.num_clbits == 1:
+            qc2 = QuantumCircuit(1)
+            if "hadamard" in task_clean:
+                qc2.h(0)
+            elif "x_gate" in task_clean or "x" in task_clean:
+                qc2.x(0)
+            elif "ry" in task_clean:
+                from numpy import pi
+                qc2.ry(pi/4, 0)
+            elif "hh" in task_clean:
+                qc2.h(0)
+                qc2.h(0)
+            qc2.save_statevector()
+            result2 = simulator.run(transpile(qc2, simulator)).result()
+            bloch = plot_bloch_multivector(result2.get_statevector())
+            bloch.savefig('bloch.png')
+    except Exception as e:
+        print(f"Skipping Bloch sphere: {e}")
 
     return (
         f"Quantum result: {counts}\n"
         "Circuit diagram saved as circuit.png\n"
         "Histogram saved as histogram.png\n"
-        "Bloch sphere saved as bloch.png"
+        "Bloch sphere saved as bloch.png (if applicable)"
     )
 
-# 2. Set up the LLM and bind the tool
-tools = [quantum_tool]
-llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key).bind_tools(tools)
 
-# 3. Define the agent node
+# 2. Bind tool to LLM
+tools = [quantum_tool]
+llm = ChatOpenAI(
+    model="gpt-3.5-turbo",
+    openai_api_key=openai_api_key
+).bind_tools(tools)
+
+# Add a system message to guide the behavior
+messages = [
+    SystemMessage(content=(
+        "You are a quantum assistant. When a user requests to run or display a quantum circuit, "
+        "you must call the tool `quantum_tool` with either a predefined circuit name (like 'hadamard', "
+        "'bell', 'x_gate', 'hh', 'ry'), or provide raw Qiskit code. Don't reply directly if a tool call is needed."
+    )),
+    HumanMessage(content="Please run a Hadamard gate and show me the circuit.")
+]
+
+# 3. Agent node
 def agent_node(state: MessagesState):
     messages: List = state["messages"]
     response = llm.invoke(messages)
     return {"messages": messages + [response]}
 
-# 4. Conditional logic: decide if tool is needed
+# 4. Conditional edge: does the LLM want to use a tool?
 def should_continue(state: MessagesState):
-    last_message = state["messages"][-1]
-    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+    last = state["messages"][-1]
+
+    # Proceed to tool if tool_call exists
+    if hasattr(last, "tool_calls") and last.tool_calls:
         return "tools"
+
+    # Stop if tool output is already in the chat
+    if "Quantum result" in last.content:
+        return END
+
     return END
 
-# 5. Build the LangGraph workflow
+# 5. Build LangGraph
 workflow = StateGraph(MessagesState)
 tool_node = ToolNode(tools)
 
@@ -97,9 +179,8 @@ workflow.add_edge("tools", "agent")
 
 graph = workflow.compile()
 
-# 6. Run the agent with a quantum prompt
+# 6. Run the system
 messages = [HumanMessage(content="Please run a Hadamard gate and show me the quantum circuit.")]
 result = graph.invoke({"messages": messages})
 
-# Print the agent's reply (the quantum result is shown in the plots)
 print(result["messages"][-1].content)
