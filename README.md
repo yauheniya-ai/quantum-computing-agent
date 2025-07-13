@@ -9,6 +9,13 @@ This project demonstrates an **AI-powered agent** that interprets natural langua
 - Quantum circuit execution and simulation (Qiskit + Qiskit Aer)
 - Automatic visualization: circuit diagram, histogram, Bloch sphere
 
+## How It Works
+
+1. **Prompt:** You provide a natural language instruction (e.g., "Apply a Hadamard gate", "Apply an X gate to the qubit", or "Create a Bell state with two qubits").
+2. **AI Reasoning:** The agent uses OpenAI GPT to interpret the instruction.
+3. **Quantum Execution:** The agent builds and runs the quantum circuit with Qiskit. Currently available predefined circuits include: Hadamard (hadamard), Pauli-X gate (x_gate), Bell state (bell), double Hadamard (hh), and RY rotation (ry).
+4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.
+
 ## Requirements
 
 - Python 3.9+
@@ -64,12 +71,6 @@ The Bloch sphere is a 3D representation of the qubit's state before measurement.
 
 ![Bloch Sphere](bloch.png)
 
-## How It Works
-
-1. **Prompt:** You provide a natural language instruction (e.g., "Apply a Hadamard gate").
-2. **AI Reasoning:** The agent uses OpenAI GPT to interpret the instruction.
-3. **Quantum Execution:** The agent builds and runs the quantum circuit with Qiskit.
-4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.
 
 **Enjoy exploring AI-driven quantum computing!**
 
