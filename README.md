@@ -16,6 +16,19 @@ This project demonstrates an **AI-powered agent** that interprets natural langua
 3. **Quantum Execution:** The agent builds and runs the quantum circuit with Qiskit. Currently available predefined circuits include: Hadamard (hadamard), Pauli-X gate (x_gate), Bell state (bell), double Hadamard (hh), and RY rotation (ry).
 4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.
 
+```mermaid
+graph TD
+    A[User Query] --> B[LangGraph Agent]
+    B --> C["GPT-3.5 Turbo (LLM)"]
+    B --> D["Quantum Computing Engine (Qiskit)"]
+    B --> E["Visualization Pipeline (Matplotlib)"]
+    D --> F["Quantum Circuit"]
+    D --> G["Simulation and Measurement"]
+    E --> H["Circuit Diagram"]
+    E --> I["Histogram"]
+    E --> J["Bloch Sphere"]
+```
+
 ## Requirements
 
 - Python 3.9+
