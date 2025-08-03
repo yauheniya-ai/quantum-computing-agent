@@ -36,12 +36,12 @@ qc = QuantumCircuit(1, 1)
 qc.x(0)
 qc.measure(0, 0)
 """,
-    "bell": """
+    "ry": """
 from qiskit import QuantumCircuit
-qc = QuantumCircuit(2, 2)
-qc.h(0)
-qc.cx(0, 1)
-qc.measure([0, 1], [0, 1])
+from numpy import pi
+qc = QuantumCircuit(1, 1)
+qc.ry(pi/4, 0)
+qc.measure(0, 0)
 """,
     "hh": """
 from qiskit import QuantumCircuit
@@ -50,12 +50,12 @@ qc.h(0)
 qc.h(0)
 qc.measure(0, 0)
 """,
-    "ry": """
+    "bell": """
 from qiskit import QuantumCircuit
-from numpy import pi
-qc = QuantumCircuit(1, 1)
-qc.ry(pi/4, 0)
-qc.measure(0, 0)
+qc = QuantumCircuit(2, 2)
+qc.h(0)
+qc.cx(0, 1)
+qc.measure([0, 1], [0, 1])
 """,
     "cnot": """
 from qiskit import QuantumCircuit
