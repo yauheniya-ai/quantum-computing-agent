@@ -13,7 +13,7 @@ This project demonstrates an **AI-powered agent** that interprets natural langua
 
 1. **Prompt:** You provide a natural language instruction (e.g., "Apply a Hadamard gate", "Apply an X gate to the qubit", or "Create a Bell state with two qubits").
 2. **AI Reasoning:** The agent uses OpenAI GPT to interpret the instruction.
-3. **Quantum Execution:** The agent builds and runs the quantum circuit with Qiskit. Currently available predefined circuits include: Hadamard (hadamard), Pauli-X gate (x_gate), Bell state (bell), double Hadamard (hh), RY rotation (ry), CNOT gate (cnot), Swap (swap), and Entangled RY (entangled_ry).
+3. **Quantum Execution:** The agent builds and runs the quantum circuit with Qiskit. Currently available predefined circuits include: Hadamard (hadamard), Pauli-X gate (x_gate), RY rotation (ry), double Hadamard (hh), Bell state (bell), CNOT gate (cnot), Swap (swap), Entangled RY (entangled_ry), Toffoli (CCX), and Fredkin (CSWAP).
 <p align="center">
   <img src="quantum_gates_grid.png" alt="Quantum Gate Circuits" width="100%"/>
 </p>

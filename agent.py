@@ -77,7 +77,19 @@ qc = QuantumCircuit(2, 2)
 qc.ry(pi/3, 0)
 qc.ry(pi/4, 1)
 qc.cx(0, 1)
-qc.measure([0, 1], [0, 1])
+qc.measure([0, 1], [0, 1]),
+""",
+    "toffoli": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(3, 3)
+qc.ccx(0, 1, 2)
+qc.measure([0, 1, 2], [0, 1, 2])
+    """,
+"fredkin": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(3, 3)
+qc.cswap(0, 1, 2)
+qc.measure([0, 1, 2], [0, 1, 2])
 """
 }
 
@@ -86,7 +98,8 @@ qc.measure([0, 1], [0, 1])
 def quantum_tool(task: str) -> str:
     """
     Runs a quantum circuit. Accepts either:
-    - A keyword like 'hadamard', 'x_gate', 'bell', 'hh', 'ry', 'cnot', 'swap', 'entangled_ry'.
+    - A keyword like 'hadamard', 'x_gate',  'ry', 'hh', 
+    'bell', 'cnot', 'swap', 'entangled_ry', 'toffoli', 'fredkin'.
     - Raw Qiskit code (must define 'qc = QuantumCircuit(...)')
     """
 
@@ -164,7 +177,8 @@ system_messages = [
     SystemMessage(content=(
         "You are a quantum assistant. When a user requests to run or display a quantum circuit, "
         "you must call the tool `quantum_tool` with either a predefined circuit name (like 'hadamard', 'x_gate', 'hh', 'ry', "
-        "'bell', 'cnot', 'swap', 'entangled_ry'), or provide raw Qiskit code. Don't reply directly if a tool call is needed."
+        "'bell', 'cnot', 'swap', 'entangled_ry', 'toffoli', 'fredkin'), "
+        "or provide raw Qiskit code. Don't reply directly if a tool call is needed."
     )),
 ]
 
@@ -201,7 +215,7 @@ workflow.add_edge("tools", "agent")
 graph = workflow.compile()
 
 # 6. Run the system
-human_message = HumanMessage(content="Please run a Hadamard gate and show me the quantum circuit.")
+human_message = HumanMessage(content="Please run a fredkin gate and show me the quantum circuit.")
 messages = system_messages + [human_message]
 result = graph.invoke({"messages": messages})
 
