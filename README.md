@@ -77,17 +77,17 @@ The agent may respond:
 ### Circuit Diagram
 This diagram shows the sequence of quantum operations applied to the qubit. The horizontal line represents the qubit, the box labeled "H" is the Hadamard gate, and the meter symbol at the end shows where the measurement happens. Time flows from left to right, so the gates are applied in that order.
 
-![Circuit Diagram](circuit.png)
+![Circuit Diagram](./output_example/circuit.png)
 
 ### Histogram
 The histogram displays the measurement results from running the quantum circuit many times. Each bar shows how often the qubit was measured as '0' or '1', helping you see the probabilities of each possible outcome in the experiment.
 
-![Histogram](histogram.png)
+![Histogram](./output_example/histogram.png)
 
 ### Bloch Sphere
 The Bloch sphere is a 3D representation of the qubit's state before measurement. After the Hadamard gate, the state vector points along the X-axis, showing the qubit is in a superposition—an equal mix of '0' and '1'.
 
-![Bloch Sphere](bloch.png)
+![Bloch Sphere](./output_example/bloch.png)
 
 
 **Enjoy exploring AI-driven quantum computing!**
