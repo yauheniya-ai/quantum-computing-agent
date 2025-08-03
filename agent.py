@@ -215,7 +215,7 @@ workflow.add_edge("tools", "agent")
 graph = workflow.compile()
 
 # 6. Run the system
-human_message = HumanMessage(content="Please run a fredkin gate and show me the quantum circuit.")
+human_message = HumanMessage(content="Please run a Hadamard gate and show me the quantum circuit.")
 messages = system_messages + [human_message]
 result = graph.invoke({"messages": messages})
 
