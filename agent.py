@@ -63,6 +63,21 @@ qc = QuantumCircuit(2, 2)
 qc.x(0)
 qc.cx(0, 1)
 qc.measure([0, 1], [0, 1])
+""",
+    "swap": """
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(2, 2)
+qc.swap(0, 1)
+qc.measure([0, 1], [0, 1])
+""",
+    "entangled_ry": """
+from qiskit import QuantumCircuit
+from numpy import pi
+qc = QuantumCircuit(2, 2)
+qc.ry(pi/3, 0)
+qc.ry(pi/4, 1)
+qc.cx(0, 1)
+qc.measure([0, 1], [0, 1])
 """
 }
 
@@ -71,17 +86,15 @@ qc.measure([0, 1], [0, 1])
 def quantum_tool(task: str) -> str:
     """
     Runs a quantum circuit. Accepts either:
-    - A keyword like 'hadamard', 'x_gate', 'bell', 'hh', 'ry', 'cnot'.
+    - A keyword like 'hadamard', 'x_gate', 'bell', 'hh', 'ry', 'cnot', 'swap', 'entangled_ry'.
     - Raw Qiskit code (must define 'qc = QuantumCircuit(...)')
     """
 
     task_clean = task.strip().lower()
 
     # Match known keywords from natural language
-    for name, code in PREDEFINED_CIRCUITS.items():
-        if name in task_clean:
-            task = name
-            break
+    if task_clean in PREDEFINED_CIRCUITS:
+        task = task_clean
 
     # Either use predefined or treat input as Qiskit code
     code = PREDEFINED_CIRCUITS.get(task, task)
@@ -106,6 +119,8 @@ def quantum_tool(task: str) -> str:
     counts = job.result().get_counts()
 
     fig_hist = plot_histogram(counts)
+    for tick in fig_hist.axes[0].get_xticklabels():
+        tick.set_rotation(0)
     fig_hist.savefig('histogram.png')
 
     # Attempt Bloch sphere (only if 1 qubit and no measurement)
@@ -148,8 +163,8 @@ llm = ChatOpenAI(
 system_messages = [
     SystemMessage(content=(
         "You are a quantum assistant. When a user requests to run or display a quantum circuit, "
-        "you must call the tool `quantum_tool` with either a predefined circuit name (like 'hadamard', "
-        "'bell', 'x_gate', 'hh', 'ry', 'cnot'), or provide raw Qiskit code. Don't reply directly if a tool call is needed."
+        "you must call the tool `quantum_tool` with either a predefined circuit name (like 'hadamard', 'x_gate', 'hh', 'ry', "
+        "'bell', 'cnot', 'swap', 'entangled_ry'), or provide raw Qiskit code. Don't reply directly if a tool call is needed."
     )),
 ]
 
@@ -186,7 +201,7 @@ workflow.add_edge("tools", "agent")
 graph = workflow.compile()
 
 # 6. Run the system
-human_message = HumanMessage(content="Please run a Hadamard and show me the quantum circuit.")
+human_message = HumanMessage(content="Please run a Hadamard gate and show me the quantum circuit.")
 messages = system_messages + [human_message]
 result = graph.invoke({"messages": messages})
 
