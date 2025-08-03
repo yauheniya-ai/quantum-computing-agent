@@ -17,7 +17,9 @@ This project demonstrates an **AI-powered agent** that interprets natural langua
 <p align="center">
   <img src="quantum_gates_grid.png" alt="Quantum Gate Circuits" width="100%"/>
 </p>
-4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.
+
+4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.   
+5. **Architecture Diagram**
 
 ```mermaid
 graph TD
