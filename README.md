@@ -19,7 +19,7 @@ This project demonstrates an **AI-powered agent** that interprets natural langua
 </p>
 
 4. **Visualization:** The agent saves and displays the quantum circuit, the measurement results, and the qubit state on the Bloch sphere.   
-5. **Architecture Diagram**
+5. **Architecture Diagram:**
 
 ```mermaid
 graph TD
@@ -59,7 +59,7 @@ cp .env.example .env
 2. **Specify your prompt in the `agent.py`**: Edit the line in Step 6 of the script to set your desired prompt: `human_message = [HumanMessage(content="YOUR_PROMPT_HERE")]`
 - For example, you can use: `messages = [HumanMessage(content="Please run a Hadamard gate and show me the quantum circuit.")]`  
 
-3. ** Run the agent:**
+3. **Run the agent:**
 
 ```bash
 python agent.py
